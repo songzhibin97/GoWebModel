@@ -5,9 +5,9 @@
 package redis
 
 import (
+	"GoWebModel/settings"
 	"fmt"
 	"github.com/go-redis/redis"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
@@ -18,10 +18,10 @@ var rdb *redis.Client
 func Init() error {
 	rdb = redis.NewClient(&redis.Options{
 		Addr: fmt.Sprintf("%s:%d",
-			viper.GetString("REDIS.Host"),
-			viper.GetInt("REDIS.Port")),
-		Password: viper.GetString("REDIS.Password"),
-		DB:       viper.GetInt("REDIS.Block"),
+			settings.GetString("REDIS.Host"),
+			settings.GetInt("REDIS.Port")),
+		Password: settings.GetString("REDIS.Password"),
+		DB:       settings.GetInt("REDIS.Block"),
 	})
 	_, err := rdb.Ping().Result()
 	if err != nil {

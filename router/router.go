@@ -6,14 +6,14 @@ package router
 
 import (
 	"GoWebModel/logger"
+	"GoWebModel/settings"
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
 // 注册路由
 func SetUp() *gin.Engine {
-	if viper.GetString("APP.Mode") == "release" {
+	if settings.GetString("APP.Mode") == "release" {
 		// 发布版本
 		gin.SetMode(gin.ReleaseMode)
 	}

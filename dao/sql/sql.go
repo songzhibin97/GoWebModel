@@ -5,11 +5,11 @@
 package sql
 
 import (
+	"GoWebModel/settings"
 	"fmt"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"strings"
 )
@@ -25,23 +25,23 @@ func Init() error {
 	var dns string
 	var err error
 	// 根据不同的driver设置不同的dns
-	switch strings.ToUpper(viper.GetString("DB.Driver")) {
+	switch strings.ToUpper(settings.GetString("DB.Driver")) {
 	case "MYSQL":
 		dns = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True",
-			viper.GetString("DB.User"),
-			viper.GetString("DB.Password"),
-			viper.GetString("DB.Host"),
-			viper.GetInt("DB.Port"),
-			viper.GetString("DB.DBName"))
+			settings.GetString("DB.User"),
+			settings.GetString("DB.Password"),
+			settings.GetString("DB.Host"),
+			settings.GetInt("DB.Port"),
+			settings.GetString("DB.DBName"))
 		// 连接数据库
 		dbInstantiate, err = sqlx.Connect("mysql", dns)
 	case "MSSQL", "SQLSERVER":
 		dns = fmt.Sprintf("server=%s;database=%s;user id=%s;password=%s;port=%d;encrypt=disable",
-			viper.GetString("DB.Host"),
-			viper.GetString("DB.DBName"),
-			viper.GetString("DB.User"),
-			viper.GetString("DB.Password"),
-			viper.GetInt("DB.Port"))
+			settings.GetString("DB.Host"),
+			settings.GetString("DB.DBName"),
+			settings.GetString("DB.User"),
+			settings.GetString("DB.Password"),
+			settings.GetInt("DB.Port"))
 		// 连接数据库
 		dbInstantiate, err = sqlx.Connect("mssql", dns)
 	}
@@ -51,8 +51,8 @@ func Init() error {
 		return err
 	}
 	// 设置对打连接数
-	dbInstantiate.SetMaxOpenConns(viper.GetInt("DB.MaxOpenCons"))
-	dbInstantiate.SetMaxIdleConns(viper.GetInt("DB.MaxIdleCons"))
+	dbInstantiate.SetMaxOpenConns(settings.GetInt("DB.MaxOpenCons"))
+	dbInstantiate.SetMaxIdleConns(settings.GetInt("DB.MaxIdleCons"))
 	return nil
 }
 

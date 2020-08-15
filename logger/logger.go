@@ -5,10 +5,10 @@
 package logger
 
 import (
+	"GoWebModel/settings"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/natefinch/lumberjack"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"net"
@@ -31,7 +31,7 @@ func Init() error {
 	encoder := getEncoder()
 	// 创建自定义logger
 	var core zapcore.Core
-	if viper.GetString("APP.Mode") != "release" {
+	if settings.GetString("APP.Mode") != "release" {
 		// 非发布版本
 		devCore := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 		// 双输出
@@ -48,7 +48,7 @@ func Init() error {
 	// 替换zap库全局的logger对象
 	// 使用zap.L() 调用全局对象
 	zap.ReplaceGlobals(lg)
-	if viper.GetBool("LOGGER.IsAddData") {
+	if settings.GetBool("LOGGER.IsAddData") {
 		go guard()
 	}
 	// 启动哨兵
@@ -88,28 +88,28 @@ func getEncoder() zapcore.Encoder {
 
 // getLogWriter:返回日志设置
 func getLogWriter() zapcore.WriteSyncer {
-	// 调用viper配置管理
+	// 调用settings配置管理
 	// 使用第三方库剪切日志
 	var filename string
-	if viper.GetBool("LOGGER.IsAddData") {
+	if settings.GetBool("LOGGER.IsAddData") {
 		// filename: LogPath+LogPrefix+日期+LogSuffix
 		filename = fmt.Sprintf("%s/%s%s.%s",
-			viper.GetString("LOGGER.LogPath"),
-			viper.GetString("LOGGER.LogPrefix"),
+			settings.GetString("LOGGER.LogPath"),
+			settings.GetString("LOGGER.LogPrefix"),
 			time.Now().Format("2006:01:02"),
-			viper.GetString("LOGGER.LogSuffix"))
+			settings.GetString("LOGGER.LogSuffix"))
 	} else {
 		filename = fmt.Sprintf("%s/%s.%s",
-			viper.GetString("LOGGER.LogPath"),
-			viper.GetString("LOGGER.LogPrefix"),
-			viper.GetString("LOGGER.LogSuffix"))
+			settings.GetString("LOGGER.LogPath"),
+			settings.GetString("LOGGER.LogPrefix"),
+			settings.GetString("LOGGER.LogSuffix"))
 	}
 	lumberJackLogger := &lumberjack.Logger{
 		Filename:   filename,
-		MaxSize:    viper.GetInt("LOGGER.MaxSize"),
-		MaxBackups: viper.GetInt("LOGGER.MaxBackups"),
-		MaxAge:     viper.GetInt("LOGGER.MaxAge"),
-		Compress:   viper.GetBool("LOGGER.Compress"),
+		MaxSize:    settings.GetInt("LOGGER.MaxSize"),
+		MaxBackups: settings.GetInt("LOGGER.MaxBackups"),
+		MaxAge:     settings.GetInt("LOGGER.MaxAge"),
+		Compress:   settings.GetBool("LOGGER.Compress"),
 	}
 	return zapcore.AddSync(lumberJackLogger)
 }
@@ -118,7 +118,7 @@ func getLogWriter() zapcore.WriteSyncer {
 func getLever() *zapcore.Level {
 	var l = new(zapcore.Level)
 	// 提供的内置方法 通过字符串获取到lever
-	err := l.UnmarshalText([]byte(viper.GetString("LOGGER.Lever")))
+	err := l.UnmarshalText([]byte(settings.GetString("LOGGER.Lever")))
 	// 如果出错 默认为debug模式
 	if err != nil {
 		fmt.Println("lever UnmarshalText error,Use Default Debug!:error", err)
